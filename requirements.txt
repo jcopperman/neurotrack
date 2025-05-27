@@ -6,4 +6,4 @@ python-dateutil==2.8.2
 streamlit==1.22.0
 plotly==5.14.1
 scipy==1.10.1  # For EEG signal processing
-scikit-learn==1.2.2  # For pattern analysis
+scikit-learn==1.5.1  # For pattern analysis
