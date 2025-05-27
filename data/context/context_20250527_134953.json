@@ -1,0 +1,13 @@
+{
+    "sleep_hours": 8.3,
+    "sleep_quality": 4,
+    "last_meal_type": "high-protein",
+    "hours_since_meal": 4.2,
+    "exercise_type": "cardio",
+    "exercise_duration_mins": 45,
+    "mood_score": 2,
+    "focus_score": 3,
+    "mental_clarity": 3,
+    "activity_type": "rest",
+    "time_of_day": "17:25"
+}

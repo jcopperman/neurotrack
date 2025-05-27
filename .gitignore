@@ -1,0 +1,48 @@
+# Database
+data/neurotrack.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (uncomment if you want to exclude data files from version control)
+# data/eeg/*
+# data/context/*
+# data/analysis/*
+
+# Keep .gitkeep files to maintain directory structure
+!data/eeg/.gitkeep
+!data/context/.gitkeep
+!data/analysis/.gitkeep

@@ -1,0 +1,13 @@
+{
+    "sleep_hours": 8.4,
+    "sleep_quality": 3,
+    "last_meal_type": "light",
+    "hours_since_meal": 0.8,
+    "exercise_type": "cardio",
+    "exercise_duration_mins": 69,
+    "mood_score": 1,
+    "focus_score": 4,
+    "mental_clarity": 2,
+    "activity_type": "creative",
+    "time_of_day": "22:22"
+}

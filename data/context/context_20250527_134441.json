@@ -1,0 +1,13 @@
+{
+    "sleep_hours": 5.6,
+    "sleep_quality": 5,
+    "last_meal_type": "skip",
+    "hours_since_meal": 1.0,
+    "exercise_type": "yoga",
+    "exercise_duration_mins": 113,
+    "mood_score": 3,
+    "focus_score": 3,
+    "mental_clarity": 3,
+    "activity_type": "deep_work",
+    "time_of_day": "14:52"
+}

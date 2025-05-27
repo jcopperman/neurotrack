@@ -1,0 +1,9 @@
+{
+    "sleep_hours": 6.0,
+    "sleep_quality": 4,
+    "last_meal_type": "skip",
+    "hours_since_meal": 0.7,
+    "exercise_type": "walking",
+    "exercise_duration_mins": 30,
+    "mood_score": 1
+}

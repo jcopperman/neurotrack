@@ -1,0 +1,4 @@
+total_sessions: 227
+avg_sleep_hours: 7.501321585903083
+avg_mood_score: 3.0748898678414096
+best_meal_type: light

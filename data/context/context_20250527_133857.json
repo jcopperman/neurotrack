@@ -1,0 +1,13 @@
+{
+    "sleep_hours": 7.8,
+    "sleep_quality": 4,
+    "last_meal_type": "high-carb",
+    "hours_since_meal": 1.0,
+    "exercise_type": "none",
+    "exercise_duration_mins": 77,
+    "mood_score": 3,
+    "focus_score": 4,
+    "mental_clarity": 5,
+    "activity_type": "deep_work",
+    "time_of_day": "15:06"
+}

@@ -1,0 +1,13 @@
+{
+    "sleep_hours": 5.7,
+    "sleep_quality": 4,
+    "last_meal_type": "balanced",
+    "hours_since_meal": 1.1,
+    "exercise_type": "yoga",
+    "exercise_duration_mins": 118,
+    "mood_score": 2,
+    "focus_score": 2,
+    "mental_clarity": 3,
+    "activity_type": "rest",
+    "time_of_day": "12:50"
+}
