@@ -4,6 +4,8 @@
 
 ---
 
+Inspired by the DIY EEG Circuit - https://www.instructables.com/DIY-EEG-and-ECG-Circuit/ 
+
 ## ✨ Features
 
 - Track EEG recordings from DIY or consumer devices
