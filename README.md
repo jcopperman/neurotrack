@@ -82,3 +82,17 @@ Run the analysis script to generate visualizations and insights:
 python3 scripts/analyze_trends.py
 ```
 
+### Web Dashboard
+Launch the interactive Streamlit dashboard to visualize your data and track your progress:
+
+```bash
+streamlit run scripts/app.py
+```
+
+The dashboard includes:
+- 📊 Performance Overview: View recent sessions and key metrics
+- 📝 Journal Entry: Log your thoughts and feelings
+- 🍽️ Diet Log: Track meals and nutrition
+- 📈 Analysis: Explore correlations and patterns
+- 💡 Recommendations: Get personalized insights based on your data
+
