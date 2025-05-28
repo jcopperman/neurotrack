@@ -1,4 +1,4 @@
-# 🧠 NeuroSelfTrack — Personal EEG Optimization Toolkit
+# 🧠 NeuroTrack — Personal EEG Optimization Toolkit
 
 **NeuroTrack** is a local-first data tracking toolkit that lets you combine EEG readings with lifestyle inputs like sleep, diet, and exercise — to understand what makes your brain perform best.
 
