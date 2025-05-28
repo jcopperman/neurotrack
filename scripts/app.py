@@ -596,4 +596,4 @@ with tabs[4]:
 
 # Footer
 st.markdown("---")
-st.markdown("*NeuroSelfTrack Dashboard - Analyze your brain performance*")
+st.markdown("*NeuroTrack Dashboard - Analyze your brain performance*")
