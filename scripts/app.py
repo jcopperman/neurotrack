@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import json
 from pathlib import Path
 import sys
+import plotly.graph_objects as go
 
 # Add the project root to Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -408,117 +409,187 @@ with tabs[4]:
             """, conn, params=(user_id,))
             
             if not analysis_df.empty:
-                # Convert timestamp to datetime with microseconds, handling both string and float formats
-                try:
-                    analysis_df['timestamp'] = pd.to_datetime(analysis_df['timestamp'], format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
-                except:
-                    # If the above fails, try parsing as float timestamp
-                    analysis_df['timestamp'] = pd.to_datetime(analysis_df['timestamp'], unit='s', errors='coerce')
+                # Quick Wins Section
+                st.subheader("🎯 Quick Wins")
+                col1, col2, col3 = st.columns(3)
                 
-                # Handle time_of_day separately since it's a different format
-                if 'time_of_day' in analysis_df.columns:
+                # Calculate average metrics
+                avg_focus = analysis_df['focus_score'].mean()
+                avg_clarity = analysis_df['mental_clarity'].mean()
+                avg_mood = analysis_df['mood_score'].mean()
+                
+                # Focus Quick Win
+                with col1:
+                    st.metric(
+                        "Focus Score",
+                        f"{avg_focus:.1f}/5",
+                        delta=f"{avg_focus - 3:.1f}",
+                        delta_color="normal"
+                    )
+                    if avg_focus < 3.5:
+                        st.info("Try 25-minute focused work sessions with 5-minute breaks")
+                
+                # Mental Clarity Quick Win
+                with col2:
+                    st.metric(
+                        "Mental Clarity",
+                        f"{avg_clarity:.1f}/5",
+                        delta=f"{avg_clarity - 3:.1f}",
+                        delta_color="normal"
+                    )
+                    if avg_clarity < 3.5:
+                        st.info("Consider reducing caffeine intake after 2 PM")
+                
+                # Mood Quick Win
+                with col3:
+                    st.metric(
+                        "Mood Score",
+                        f"{avg_mood:.1f}/5",
+                        delta=f"{avg_mood - 3:.1f}",
+                        delta_color="normal"
+                    )
+                    if avg_mood < 3.5:
+                        st.info("Try 10-minute meditation before starting work")
+                
+                # Optimal Times Section
+                st.subheader("⏰ Optimal Times")
+                
+                # Convert time_of_day to hour
+                analysis_df['hour'] = pd.to_datetime(analysis_df['time_of_day'], format='%H:%M', errors='coerce').dt.hour
+                
+                # Calculate best times for different activities
+                activity_times = {}
+                for activity in ['deep_work', 'creative', 'learning', 'rest']:
+                    activity_data = analysis_df[analysis_df['activity_type'] == activity]
+                    if not activity_data.empty:
+                        best_hour = activity_data.groupby('hour').agg({
+                            'focus_score': 'mean',
+                            'mental_clarity': 'mean',
+                            'productivity_score': 'mean'
+                        }).mean(axis=1).idxmax()
+                        
+                        activity_times[activity] = {
+                            'hour': best_hour,
+                            'score': activity_data.groupby('hour').agg({
+                                'focus_score': 'mean',
+                                'mental_clarity': 'mean',
+                                'productivity_score': 'mean'
+                            }).mean(axis=1).max()
+                        }
+                
+                # Display optimal times in a more user-friendly format
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("**Best Times for Different Activities**")
+                    for activity, data in activity_times.items():
+                        try:
+                            hour = int(data['hour'])  # Ensure hour is an integer
+                            score = float(data['score'])  # Ensure score is a float
+                            confidence = "High" if score > 4 else "Medium" if score > 3 else "Low"
+                            
+                            st.write(f"**{activity.replace('_', ' ').title()}**")
+                            st.write(f"🕒 {hour:02d}:00 - {(hour+2)%24:02d}:00")  # Handle hour wrapping
+                            st.write(f"Confidence: {confidence}")
+                            st.progress(min(score/5, 1.0))  # Ensure progress bar doesn't exceed 1.0
+                            st.write("---")
+                        except (ValueError, TypeError) as e:
+                            st.warning(f"Could not process optimal time for {activity}: {str(e)}")
+                            continue
+                
+                with col2:
                     try:
-                        analysis_df['hour'] = pd.to_datetime(analysis_df['time_of_day'], format='%H:%M', errors='coerce').dt.hour
-                    except:
-                        # If time_of_day is in a different format, try to extract hour directly
-                        analysis_df['hour'] = pd.to_numeric(analysis_df['time_of_day'], errors='coerce')
+                        # Create a heatmap of performance by hour
+                        hourly_performance = analysis_df.groupby('hour').agg({
+                            'focus_score': 'mean',
+                            'mental_clarity': 'mean',
+                            'productivity_score': 'mean'
+                        }).mean(axis=1)
+                        
+                        # Ensure all hours are present (0-23)
+                        all_hours = pd.Series(index=range(24), dtype=float)
+                        hourly_performance = hourly_performance.reindex(all_hours.index, fill_value=0)
+                        
+                        # Create a color-coded heatmap
+                        fig = go.Figure(data=go.Heatmap(
+                            z=[hourly_performance.values],
+                            x=hourly_performance.index,
+                            y=['Performance'],
+                            colorscale='RdYlGn',
+                            showscale=True
+                        ))
+                        
+                        fig.update_layout(
+                            title="Performance by Hour",
+                            xaxis_title="Hour of Day",
+                            height=200
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"Could not generate performance heatmap: {str(e)}")
                 
-                # Activity-specific recommendations
-                st.subheader("Optimal Conditions by Activity Type")
+                # Lifestyle Recommendations
+                st.subheader("🌱 Lifestyle Recommendations")
                 
-                # Calculate average performance metrics by activity type
-                try:
-                    activity_metrics = analysis_df.groupby('activity_type').agg({
+                # Sleep Analysis
+                if 'sleep_hours' in analysis_df.columns:
+                    best_sleep = analysis_df.groupby('sleep_hours').agg({
                         'focus_score': 'mean',
                         'mental_clarity': 'mean',
-                        'mood_score': 'mean',
-                        'energy_level': 'mean',
                         'productivity_score': 'mean'
-                    }).round(2)
+                    }).mean(axis=1).idxmax()
                     
-                    # Display activity-specific recommendations
-                    for activity in ['deep_work', 'creative', 'learning', 'rest']:
-                        if activity in activity_metrics.index:
-                            st.markdown(f"### 🎯 {activity.replace('_', ' ').title()}")
-                            
-                            # Get best performing sessions for this activity
-                            activity_data = analysis_df[analysis_df['activity_type'] == activity]
-                            
-                            # Time of day analysis
-                            if 'hour' in activity_data.columns:
-                                best_hours = activity_data.groupby('hour').agg({
-                                    'focus_score': 'mean',
-                                    'mental_clarity': 'mean',
-                                    'productivity_score': 'mean'
-                                }).mean(axis=1).sort_values(ascending=False)
-                                
-                                if not best_hours.empty:
-                                    best_hour = best_hours.index[0]
-                                    st.write(f"**Best Time of Day:** {int(best_hour):02d}:00")
-                            
-                            # Diet analysis
-                            if 'diet_meal_type' in activity_data.columns:
-                                best_meals = activity_data.groupby('diet_meal_type').agg({
-                                    'focus_score': 'mean',
-                                    'mental_clarity': 'mean',
-                                    'productivity_score': 'mean'
-                                }).mean(axis=1).sort_values(ascending=False)
-                                
-                                if not best_meals.empty:
-                                    st.write("**Optimal Meal Types:**")
-                                    for meal, score in best_meals.head(2).items():
-                                        st.write(f"- {meal.title()} (Score: {score:.2f})")
-                            
-                            # Lifestyle factors
-                            st.write("**Optimal Conditions:**")
-                            
-                            # Sleep analysis
-                            if 'sleep_hours' in activity_data.columns:
-                                best_sleep = activity_data.groupby('sleep_hours').agg({
-                                    'focus_score': 'mean',
-                                    'mental_clarity': 'mean',
-                                    'productivity_score': 'mean'
-                                }).mean(axis=1).sort_values(ascending=False)
-                                
-                                if not best_sleep.empty:
-                                    st.write(f"- Sleep: {best_sleep.index[0]:.1f} hours")
-                            
-                            # Exercise analysis
-                            if 'exercise_type' in activity_data.columns:
-                                best_exercise = activity_data.groupby('exercise_type').agg({
-                                    'focus_score': 'mean',
-                                    'mental_clarity': 'mean',
-                                    'productivity_score': 'mean'
-                                }).mean(axis=1).sort_values(ascending=False)
-                                
-                                if not best_exercise.empty:
-                                    st.write(f"- Exercise: {best_exercise.index[0].title()}")
-                            
-                            st.markdown("---")
-                except Exception as e:
-                    st.warning(f"Could not generate activity-specific recommendations: {str(e)}")
+                    current_sleep = analysis_df['sleep_hours'].mean()
+                    
+                    st.write("**Sleep Optimization**")
+                    if abs(current_sleep - best_sleep) > 0.5:
+                        st.warning(f"Your average sleep ({current_sleep:.1f}h) differs from optimal ({best_sleep:.1f}h)")
+                    else:
+                        st.success(f"Your sleep duration is optimal at {current_sleep:.1f} hours")
                 
-                # General recommendations
-                st.subheader("Overall Performance Insights")
+                # Exercise Analysis
+                if 'exercise_type' in analysis_df.columns:
+                    best_exercise = analysis_df.groupby('exercise_type').agg({
+                        'focus_score': 'mean',
+                        'mental_clarity': 'mean',
+                        'productivity_score': 'mean'
+                    }).mean(axis=1).idxmax()
+                    
+                    st.write("**Exercise Impact**")
+                    st.write(f"Most effective exercise type: {best_exercise.title()}")
                 
-                # Calculate correlation matrix for key metrics
-                metrics = ['focus_score', 'mental_clarity', 'mood_score', 'energy_level', 'productivity_score']
-                corr_matrix = analysis_df[metrics].corr()
+                # Diet Analysis
+                if 'diet_meal_type' in analysis_df.columns:
+                    best_meal = analysis_df.groupby('diet_meal_type').agg({
+                        'focus_score': 'mean',
+                        'mental_clarity': 'mean',
+                        'productivity_score': 'mean'
+                    }).mean(axis=1).idxmax()
+                    
+                    st.write("**Diet Optimization**")
+                    st.write(f"Most effective meal type: {best_meal.title()}")
                 
-                # Display strongest correlations
-                st.write("**Key Correlations:**")
-                for i in range(len(metrics)):
-                    for j in range(i+1, len(metrics)):
-                        corr = corr_matrix.iloc[i, j]
-                        if abs(corr) > 0.3:  # Only show meaningful correlations
-                            st.write(f"- {metrics[i].replace('_', ' ').title()} and {metrics[j].replace('_', ' ').title()}: {corr:.2f}")
+                # Action Items
+                st.subheader("📋 Action Items")
                 
-                # Display performance trends
-                st.write("**Performance Trends:**")
-                for metric in metrics:
-                    if metric in analysis_df.columns:
-                        avg_score = analysis_df[metric].mean()
-                        st.write(f"- Average {metric.replace('_', ' ').title()}: {avg_score:.2f}/5")
+                # Generate personalized action items based on the analysis
+                action_items = []
+                
+                # Sleep-related action items
+                if 'sleep_hours' in analysis_df.columns and abs(current_sleep - best_sleep) > 0.5:
+                    action_items.append(f"Adjust sleep schedule to target {best_sleep:.1f} hours")
+                
+                # Exercise-related action items
+                if 'exercise_type' in analysis_df.columns:
+                    action_items.append(f"Incorporate more {best_exercise} into your routine")
+                
+                # Diet-related action items
+                if 'diet_meal_type' in analysis_df.columns:
+                    action_items.append(f"Plan more {best_meal} meals during work hours")
+                
+                # Display action items
+                for item in action_items:
+                    st.write(f"✅ {item}")
                 
         except Exception as e:
             st.error(f"Error loading analysis data: {str(e)}")
