@@ -1,6 +1,6 @@
 # 🧠 NeuroSelfTrack — Personal EEG Optimization Toolkit
 
-**NeuroSelfTrack** is a local-first data tracking toolkit that lets you combine EEG readings with lifestyle inputs like sleep, diet, and exercise — to understand what makes your brain perform best.
+**NeuroTrack** is a local-first data tracking toolkit that lets you combine EEG readings with lifestyle inputs like sleep, diet, and exercise — to understand what makes your brain perform best.
 
 ---
 
@@ -80,4 +80,3 @@ Run the analysis script to generate visualizations and insights:
 python3 scripts/analyze_trends.py
 ```
 
-Check the `

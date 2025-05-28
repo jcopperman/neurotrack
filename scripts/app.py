@@ -24,13 +24,13 @@ def get_db_connection():
 
 # Set page config
 st.set_page_config(
-    page_title="NeuroSelfTrack Dashboard",
+    page_title="Dashboard",
     page_icon="🧠",
     layout="wide"
 )
 
 # Sidebar
-st.sidebar.title("🧠 NeuroSelfTrack")
+st.sidebar.title("🧠 NeuroTrack")
 st.sidebar.markdown("---")
 
 # User filter
@@ -107,7 +107,7 @@ else:
     st.sidebar.warning("No sessions found for this user")
 
 # Main content
-st.title(f"NeuroSelfTrack Dashboard - {selected_user}")
+st.title(f"Dashboard - {selected_user}")
 
 # Create tabs for different views
 tabs = st.tabs([
