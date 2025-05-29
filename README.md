@@ -96,3 +96,17 @@ The dashboard includes:
 - Analysis: Explore correlations and patterns
 - Recommendations: Get personalized insights based on your data
 
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Inspired by the DIY EEG Circuit project
+- Built with Streamlit, Pandas, and Plotly
+- Uses SQLite for local data storage
+
