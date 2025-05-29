@@ -1,4 +1,4 @@
-# 🧠 NeuroTrack — Personal EEG Optimization Toolkit
+# NeuroTrack — Personal EEG Optimization Toolkit
 
 [![Build and Test](https://github.com/jcopperman/neuroTrack/actions/workflows/build.yml/badge.svg)](https://github.com/jcopperman/neuroTrack/actions/workflows/build.yml)
 
