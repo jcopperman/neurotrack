@@ -17,7 +17,7 @@ from scripts.log_session import SessionLogger
 
 # Initialize session state
 if 'current_user' not in st.session_state:
-    st.session_state.current_user = 1  # Default to user 1 for now
+    st.session_state.current_user = None  # Initialize as None instead of defaulting to 1
 
 # Initialize database connection
 def get_db_connection():
@@ -39,76 +39,96 @@ with get_db_connection() as conn:
     users_df = pd.read_sql_query("SELECT id, name FROM users", conn)
 
 # Get the current user's name from the session state
-current_user_name = users_df[users_df['id'] == st.session_state.current_user]['name'].iloc[0]
+current_user_name = None
+current_user_index = 0
 
-# Get the index of the current user
-current_user_index = int(users_df[users_df['id'] == st.session_state.current_user].index[0])
+if st.session_state.current_user is not None:
+    user_data = users_df[users_df['id'] == st.session_state.current_user]
+    if not user_data.empty:
+        current_user_name = user_data['name'].iloc[0]
+        current_user_index = int(user_data.index[0])
 
-selected_user = st.sidebar.selectbox(
+# Create a list of tuples (name, id) for the selectbox
+user_options = list(zip(users_df['name'], users_df['id']))
+
+selected_user_tuple = st.sidebar.selectbox(
     "Select User",
-    users_df['name'].tolist(),
-    index=current_user_index
+    options=user_options,
+    index=current_user_index,
+    format_func=lambda x: x[0]  # Display only the name
 )
 
 # Update session state when user changes
-if selected_user != current_user_name:
-    st.session_state.current_user = users_df[users_df['name'] == selected_user]['id'].iloc[0]
+if selected_user_tuple[1] != st.session_state.current_user:
+    st.session_state.current_user = selected_user_tuple[1]
+    st.experimental_rerun()  # Force a rerun to update all data
 
 # Get user ID from session state
 user_id = st.session_state.current_user
 
+if user_id is None:
+    st.warning("Please select a user to view their data")
+    st.stop()
+
+# Debug: Print the user_id we're querying for
+st.write(f"Debug - Querying for user_id: {user_id}")
+
 # Date range filter
 with get_db_connection() as conn:
     # First get unique timestamps
-    sessions_df = pd.read_sql_query(
-        """
-        SELECT DISTINCT timestamp 
-        FROM sessions 
-        WHERE user_id = ? 
-        ORDER BY timestamp
-        """,
-        conn,
-        params=(user_id,)
-    )
-
-if not sessions_df.empty:
     try:
-        # Convert timestamp to datetime safely
-        timestamps = []
-        for ts in sessions_df['timestamp']:
-            try:
-                # Try parsing as string with microseconds first
-                timestamps.append(pd.to_datetime(ts, format='%Y-%m-%d %H:%M:%S.%f'))
-            except:
-                try:
-                    # If that fails, try parsing as Unix timestamp
-                    timestamps.append(pd.to_datetime(ts, unit='s'))
-                except:
-                    # If both fail, try default parsing
-                    timestamps.append(pd.to_datetime(ts))
+        sessions_df = pd.read_sql_query(
+            """
+            SELECT DISTINCT timestamp 
+            FROM sessions 
+            WHERE user_id = ? 
+            ORDER BY timestamp
+            """,
+            conn,
+            params=(user_id,)
+        )
         
-        if timestamps:
-            sessions_df['timestamp'] = timestamps
-            min_date = min(timestamps).date()
-            max_date = max(timestamps).date()
-            date_range = st.sidebar.date_input(
-                "Select Date Range",
-                value=(min_date, max_date),
-                min_value=min_date,
-                max_value=max_date
-            )
+        if not sessions_df.empty:
+            try:
+                # Convert timestamp to datetime safely
+                timestamps = []
+                for ts in sessions_df['timestamp']:
+                    try:
+                        # Try parsing as string with microseconds first
+                        timestamps.append(pd.to_datetime(ts, format='%Y-%m-%d %H:%M:%S.%f'))
+                    except:
+                        try:
+                            # If that fails, try parsing as Unix timestamp
+                            timestamps.append(pd.to_datetime(ts, unit='s'))
+                        except:
+                            # If both fail, try default parsing
+                            timestamps.append(pd.to_datetime(ts))
+                
+                if timestamps:
+                    sessions_df['timestamp'] = timestamps
+                    min_date = min(timestamps).date()
+                    max_date = max(timestamps).date()
+                    date_range = st.sidebar.date_input(
+                        "Select Date Range",
+                        value=(min_date, max_date),
+                        min_value=min_date,
+                        max_value=max_date
+                    )
+                else:
+                    date_range = (datetime.now().date(), datetime.now().date())
+                    st.sidebar.warning("No valid timestamps found for this user")
+            except Exception as e:
+                st.error(f"Error processing dates: {str(e)}")
+                date_range = (datetime.now().date(), datetime.now().date())
         else:
             date_range = (datetime.now().date(), datetime.now().date())
-            st.sidebar.warning("No valid timestamps found for this user")
+            st.sidebar.warning("No sessions found for this user")
     except Exception as e:
-        st.error(f"Error processing dates: {str(e)}")
+        st.error(f"Error querying sessions: {str(e)}")
         date_range = (datetime.now().date(), datetime.now().date())
-else:
-    date_range = (datetime.now().date(), datetime.now().date())
-    st.sidebar.warning("No sessions found for this user")
 
 # Main content
-st.title(f"Dashboard - {selected_user}")
+st.title(f"Dashboard - {selected_user_tuple[0]}")
 
 # Create tabs for different views
 tabs = st.tabs([

@@ -6,7 +6,7 @@
 
 Inspired by the DIY EEG Circuit - https://www.instructables.com/DIY-EEG-and-ECG-Circuit/ 
 
-## ✨ Features
+## Features
 
 - Track EEG recordings from DIY or consumer devices
 - Correlate with:
@@ -22,7 +22,7 @@ Inspired by the DIY EEG Circuit - https://www.instructables.com/DIY-EEG-and-ECG-
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -51,7 +51,7 @@ python3 scripts/seed_data.py
 ```
 This will create 3 test users and populate 30 days of sample EEG sessions with varied lifestyle contexts.
 
-## 📝 Usage
+## Usage
 
 ### Logging a Session
 Use `scripts/log_session.py` to record new sessions with EEG data and lifestyle context:
@@ -90,9 +90,9 @@ streamlit run scripts/app.py
 ```
 
 The dashboard includes:
-- 📊 Performance Overview: View recent sessions and key metrics
-- 📝 Journal Entry: Log your thoughts and feelings
-- 🍽️ Diet Log: Track meals and nutrition
-- 📈 Analysis: Explore correlations and patterns
-- 💡 Recommendations: Get personalized insights based on your data
+- Performance Overview: View recent sessions and key metrics
+- Journal Entry: Log your thoughts and feelings
+- Diet Log: Track meals and nutrition
+- Analysis: Explore correlations and patterns
+- Recommendations: Get personalized insights based on your data
 

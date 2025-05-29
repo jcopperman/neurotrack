@@ -29,6 +29,15 @@ def seed_database():
     conn = sqlite3.connect('data/neurotrack.db')
     cursor = conn.cursor()
 
+    # Clear existing data
+    cursor.execute('DELETE FROM diet_log')
+    cursor.execute('DELETE FROM journal_entries')
+    cursor.execute('DELETE FROM lifestyle_context')
+    cursor.execute('DELETE FROM eeg_data')
+    cursor.execute('DELETE FROM sessions')
+    cursor.execute('DELETE FROM users')
+    conn.commit()
+
     # Create sample users
     users = [
         ('John Doe',),
@@ -46,6 +55,22 @@ def seed_database():
     start_date = datetime(2024, 1, 1)
     end_date = datetime(2024, 5, 20)
     
+    # Define activity patterns for each user
+    activity_patterns = {
+        'deep_work': {'hours': [9, 14, 16], 'duration': 2},
+        'creative': {'hours': [10, 15], 'duration': 3},
+        'learning': {'hours': [11, 19], 'duration': 2},
+        'rest': {'hours': [13, 17], 'duration': 1}
+    }
+    
+    # Define meal patterns
+    meal_patterns = {
+        'breakfast': {'hours': [7, 8, 9], 'types': ['balanced', 'high-protein']},
+        'lunch': {'hours': [12, 13], 'types': ['balanced', 'high-carb']},
+        'dinner': {'hours': [18, 19, 20], 'types': ['balanced', 'high-protein']},
+        'snack': {'hours': [10, 15, 16], 'types': ['light']}
+    }
+    
     for user_id in user_ids:
         # Generate a random number of sessions for this user
         num_sessions = random.randint(50, 100)
@@ -57,6 +82,21 @@ def seed_database():
                 minutes=random.randint(0, 59),
                 seconds=random.randint(0, 59)
             )
+            
+            # Determine activity type based on time of day
+            hour = session_time.hour
+            activity_type = 'other'
+            for act, pattern in activity_patterns.items():
+                if hour in pattern['hours']:
+                    activity_type = act
+                    break
+            
+            # Determine meal type based on time of day
+            meal_type = 'snack'
+            for meal, pattern in meal_patterns.items():
+                if hour in pattern['hours']:
+                    meal_type = meal
+                    break
             
             # Create session
             cursor.execute('''
@@ -77,7 +117,25 @@ def seed_database():
                 VALUES (?, ?, ?, ?)
             ''', [(session_id, ts, ch1, ch2) for ts, ch1, ch2 in eeg_data])
 
-            # Create lifestyle context
+            # Generate correlated lifestyle context
+            sleep_hours = round(random.uniform(7, 9), 1)  # More realistic sleep range
+            sleep_quality = random.randint(3, 5)  # Higher quality sleep
+            
+            # Generate correlated scores based on activity type and time
+            if activity_type == 'deep_work':
+                focus_score = random.randint(4, 5)
+                mental_clarity = random.randint(3, 5)
+            elif activity_type == 'creative':
+                focus_score = random.randint(3, 5)
+                mental_clarity = random.randint(4, 5)
+            elif activity_type == 'learning':
+                focus_score = random.randint(3, 5)
+                mental_clarity = random.randint(3, 5)
+            else:
+                focus_score = random.randint(2, 4)
+                mental_clarity = random.randint(2, 4)
+
+            # Create lifestyle context with correlated data
             cursor.execute('''
                 INSERT INTO lifestyle_context (
                     session_id, sleep_hours, sleep_quality, last_meal_type,
@@ -88,24 +146,32 @@ def seed_database():
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 session_id,
-                round(random.uniform(6, 9), 1),
-                random.randint(1, 5),
-                random.choice(['balanced', 'high-protein', 'high-carb', 'light', 'skip']),
+                sleep_hours,
+                sleep_quality,
+                random.choice(meal_patterns[meal_type]['types']),
                 round(random.uniform(0.5, 4), 1),
                 random.choice(['small', 'medium', 'large']),
-                random.randint(1, 5),
-                random.randint(1, 5),
+                random.randint(3, 5),
+                random.randint(3, 5),
                 random.randint(0, 300),
                 random.choice(['cardio', 'strength', 'yoga', 'none']),
                 random.randint(0, 60),
-                random.randint(1, 5),
-                random.randint(1, 5),
-                random.randint(1, 5),
-                random.choice(['deep_work', 'creative', 'learning', 'rest', 'other']),
+                random.randint(3, 5),  # Higher mood scores
+                focus_score,
+                mental_clarity,
+                activity_type,
                 session_time.strftime('%H:%M')
             ))
 
-            # Create journal entry
+            # Create journal entry with correlated mood
+            mood_options = {
+                'deep_work': ['focused', 'determined', 'productive'],
+                'creative': ['inspired', 'energetic', 'excited'],
+                'learning': ['curious', 'engaged', 'motivated'],
+                'rest': ['relaxed', 'calm', 'peaceful'],
+                'other': ['neutral', 'balanced', 'content']
+            }
+            
             cursor.execute('''
                 INSERT INTO journal_entries (
                     session_id, mood, energy_level, stress_level,
@@ -113,15 +179,27 @@ def seed_database():
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (
                 session_id,
-                random.choice(['focused', 'relaxed', 'energetic', 'tired', 'stressed']),
-                random.randint(1, 5),
-                random.randint(1, 5),
-                random.randint(1, 5),
-                f"Sample journal entry for session {_ + 1}",
-                'work,focus,creative'
+                random.choice(mood_options[activity_type]),
+                random.randint(3, 5),  # Higher energy levels
+                random.randint(1, 3),  # Lower stress levels
+                focus_score,  # Correlate with focus score
+                f"Sample journal entry for {activity_type} session",
+                f"{activity_type},focus,{meal_type}"
             ))
 
-            # Create diet log
+            # Create diet log with realistic meal data
+            meal_calories = {
+                'breakfast': (300, 600),
+                'lunch': (500, 800),
+                'dinner': (600, 900),
+                'snack': (100, 300)
+            }
+            
+            calories = random.randint(*meal_calories[meal_type])
+            protein = round(calories * random.uniform(0.2, 0.3) / 4, 1)  # 20-30% of calories from protein
+            carbs = round(calories * random.uniform(0.4, 0.5) / 4, 1)    # 40-50% of calories from carbs
+            fats = round(calories * random.uniform(0.2, 0.3) / 9, 1)     # 20-30% of calories from fats
+            
             cursor.execute('''
                 INSERT INTO diet_log (
                     session_id, meal_type, food_items, calories,
@@ -129,15 +207,15 @@ def seed_database():
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 session_id,
-                random.choice(['breakfast', 'lunch', 'dinner', 'snack']),
-                json.dumps(['Sample food 1', 'Sample food 2']),
-                random.randint(200, 800),
-                round(random.uniform(10, 40), 1),
-                round(random.uniform(20, 60), 1),
-                round(random.uniform(5, 30), 1),
+                meal_type,
+                json.dumps([f"{meal_type} item 1", f"{meal_type} item 2"]),
+                calories,
+                protein,
+                carbs,
+                fats,
                 round(random.uniform(2, 15), 1),
                 round(random.uniform(5, 25), 1),
-                "Sample meal notes"
+                f"Sample {meal_type} notes"
             ))
 
     conn.commit()
