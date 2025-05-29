@@ -4,8 +4,6 @@
 
 ---
 
-Inspired by the DIY EEG Circuit - https://www.instructables.com/DIY-EEG-and-ECG-Circuit/ 
-
 ## Features
 
 - Track EEG recordings from DIY or consumer devices
@@ -106,7 +104,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Inspired by the DIY EEG Circuit project
+- Inspired by the DIY EEG Circuit project - https://www.instructables.com/DIY-EEG-and-ECG-Circuit/ 
 - Built with Streamlit, Pandas, and Plotly
 - Uses SQLite for local data storage
 
