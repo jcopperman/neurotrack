@@ -70,9 +70,6 @@ if user_id is None:
     st.warning("Please select a user to view their data")
     st.stop()
 
-# Debug: Print the user_id we're querying for
-st.write(f"Debug - Querying for user_id: {user_id}")
-
 # Date range filter
 with get_db_connection() as conn:
     # First get unique timestamps
