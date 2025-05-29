@@ -27,12 +27,16 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov
         
-    - name: Initialize database
-      run: python3 scripts/init_db.py
-      
-    - name: Run tests
+    - name: Create test database
       run: |
-        pytest --cov=scripts tests/
+        mkdir -p data
+        python3 scripts/init_db.py
+        
+    - name: Run tests
+      env:
+        TEST_DB_PATH: data/test_neurotrack.db
+      run: |
+        pytest --cov=scripts tests/ -v
         
     - name: Check code style
       run: |
