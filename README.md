@@ -1,5 +1,7 @@
 # 🧠 NeuroTrack — Personal EEG Optimization Toolkit
 
+[![Build and Test](https://github.com/yourusername/neuroTrack/actions/workflows/build.yml/badge.svg)](https://github.com/yourusername/neuroTrack/actions/workflows/build.yml)
+
 **NeuroTrack** is a local-first data tracking toolkit that lets you combine EEG readings with lifestyle inputs like sleep, diet, and exercise — to understand what makes your brain perform best.
 
 ---
@@ -29,7 +31,7 @@
 ### Installation
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/neuroTrack.git
+git clone https://github.com/jcopperman/neuroTrack.git
 cd neuroTrack
 ```
 
